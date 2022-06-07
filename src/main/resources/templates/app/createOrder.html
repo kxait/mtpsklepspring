@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Zloz zamowienie</title>
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body>
+        <div th:replace="fragments/header :: header(${userInfo.email}, ${userInfo.id}, ${userInfo.sessionId}, ${userInfo.isAdmin})"></div>
+        <div th:if="${success == null}">
+            <div>
+                <table class="border">
+                    <thead>
+                    <tr>
+                        <td>Nazwa</td>
+                        <td>Cena</td>
+                        <td>Ilosc</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entry, id : ${cart}">
+                        <td th:text="${entry.productName}"></td>
+                        <td><span th:text="${entry.productPrice}"></span> PLN</td>
+                        <td th:text="${entry.quantity}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div>Suma: <span th:text="${subtotal}"></span> PLN</div>
+                <div>Cena paczki: <span th:text="${postagePrice}"></span> PLN</div>
+            </div>
+            <div class="breakout">
+                <form action="#" th:action="@{/app/createOrder}" th:object="${orderForm}" method="post">
+                    <table>
+                        <tr>
+                            <td>Ulica</td>
+                            <td><input type="text" th:field="*{street}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Numer:</td>
+                            <td><input type="text" th:field="*{streetNumber}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Kod pocztowy:</td>
+                            <td><input type="text" th:field="*{postalCode}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Miasto:</td>
+                            <td><input type="text" th:field="*{city}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Kraj:</td>
+                            <td><input type="text" th:field="*{country}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Numer telefonu:</td>
+                            <td><input type="text" th:field="*{phone}"/></td>
+                        </tr>
+                    </table>
+                    <p>
+                        <input type="submit" value="Złóż zamówienie" />
+                    </p>
+                </form>
+            </div>
+        </div>
+        <div th:if="${success == true}">
+            Udalo sie zlozyc zamowienie!
+        </div>
+    </body>
+</html>

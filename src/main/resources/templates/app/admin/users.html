@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Użytkownicy</title>
+        <link rel="stylesheet" href="/style.css">
+        <script type="application/javascript" th:inline="javascript">
+            const statuses = [
+                "NEW",
+                "ACTIVE",
+                "BLOCKED"
+            ];
+
+            const types = [
+                "CUSTOMER",
+                "ADMIN"
+            ];
+
+            function setUserStatus(userId, userStatus) {
+                return fetch('/api/admin/users/' + userId + '/setStatus', {
+                    method: 'POST',
+                    headers: {
+                        id: [[${userInfo.sessionId}]],
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userStatus)
+                });
+            }
+
+            function setUserType(userId, userType) {
+                return fetch('/api/admin/users/' + userId + '/setType', {
+                    method: 'POST',
+                    headers: {
+                        id: [[${userInfo.sessionId}]],
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userType)
+                });
+            }
+
+            function createPrechosenDropdownWithAction(choices, chosen, onchange) {
+                console.log(choices, chosen, onchange);
+                let elem = document.createElement("select");
+                for(const choice of choices) {
+                    let optionElem = document.createElement("option");
+                    optionElem.value = choice;
+                    optionElem.innerText = choice;
+                    optionElem.selected = choice === chosen;
+                    elem.add(optionElem);
+                }
+                elem.onchange = e => onchange(e.target);
+                return elem;
+            }
+
+            window.onload = () => {
+                const statusSelectItems = document.getElementsByClassName("statusSelect");
+                console.log(statusSelectItems);
+                const typeSelectItems = document.getElementsByClassName("typeSelect");
+
+                while(statusSelectItems[0]) {
+                    const item = statusSelectItems[0];
+                    const chosenStatus = item.classList[1];
+                    const userId = item.classList[2];
+                    const elem = createPrechosenDropdownWithAction(
+                        statuses,
+                        chosenStatus,
+                        target => setUserStatus(userId, target.value));
+                    item.replaceWith(elem);
+                }
+
+                while(typeSelectItems[0]) {
+                    const item = typeSelectItems[0];
+                    const chosenType = item.classList[1];
+                    const userId = item.classList[2];
+                    const elem = createPrechosenDropdownWithAction(
+                        types,
+                        chosenType,
+                        target => setUserType(userId, target.value));
+                    item.replaceWith(elem);
+                }
+            }
+        </script>
+    </head>
+    <body>
+    <div th:replace="fragments/header :: header(${userInfo.email}, ${userInfo.id}, ${userInfo.sessionId}, ${userInfo.isAdmin})"></div>
+
+    <table class="border">
+            <thead>
+                <tr>
+                    <td>ID</td>
+                    <td>Email</td>
+                    <td>Status</td>
+                    <td>Typ</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user, id : ${users}">
+                    <td th:text="${user.userId}"></td>
+                    <td th:text="${user.email}"></td>
+                    <td th:if="${user.email != userInfo.email}">
+                        <select th:class="@{'statusSelect ' + ${user.status} + ' ' + ${user.userId}}"></select>
+                    </td>
+                    <td th:if="${user.email != userInfo.email}">
+                        <select th:class="@{'typeSelect ' + ${user.userType} + ' ' + ${user.userId}}"></select>
+                    </td>
+                    <td th:if="${user.email == userInfo.email}" th:text="${user.status}"></td>
+                    <td th:if="${user.email == userInfo.email}" th:text="${user.userType}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>

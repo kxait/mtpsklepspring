@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body>
+        <div th:fragment="header(email, userId, sessionId, isAdmin)">
+            <script type="application/javascript" th:inline="javascript">
+                function reloadCartText() {
+                    if([[${!isAdmin}]]) {
+                        fetch("/api/cart/quantity", {
+                            headers: {
+                                id: [[${sessionId}]]
+                            }
+                        }).then(response => response.json())
+                            .then(data => {
+                                document.getElementById("cartLink").innerText = `Koszyk (${data} szt.)`;
+                            });
+                    }
+                }
+                reloadCartText();
+            </script>
+            <p>
+                <div>
+                    <span>Witaj</span>
+                    <span th:text="${email}"></span>
+                    <span th:if="${isAdmin}"><b>(ADMIN)</b></span>
+                </div>
+                <div>
+                    <a href="/app/menu">Menu</a>
+                    <a href="/logout">Wyloguj</a>
+                    <a href="/app/cart" th:if="${!isAdmin}">
+                        <span id="cartLink"></span>
+                    </a>
+                </div>
+            </p>
+        </div>
+    </body>
+</html>

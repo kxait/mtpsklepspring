@@ -1,0 +1,12 @@
+table.border td {
+    border: 1px solid;
+}
+
+.breakout {
+    padding: 5px;
+    border: 1px solid;
+}
+
+span.b, p.b {
+    font-weight: bold;
+}

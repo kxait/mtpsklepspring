@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Produkty</title>
+        <link rel="stylesheet" href="/style.css">
+        <script type="application/javascript" th:inline="javascript">
+            function removeProduct(productId) {
+                fetch('/api/admin/products/' + productId, {
+                    method: 'DELETE',
+                    headers: {
+                        id: [[${userInfo.sessionId}]],
+                        'Content-Type': 'application/json'
+                    }
+                }).then(_ => document.location = "");
+            }
+
+            function addToCart(productId, quantity = 1) {
+                fetch('/api/cart/' + productId, {
+                    method: 'POST',
+                    headers: {
+                        id: [[${userInfo.sessionId}]],
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(quantity)
+                }).then(() => reloadCartText());
+            }
+
+            window.onload = () => {
+                const removeButtons = document.getElementsByClassName("removeProductButton");
+                for (const button of removeButtons) {
+                    const productId = button.classList[1];
+                    button.onclick = () => removeProduct(productId);
+                }
+
+                const editButtons = document.getElementsByClassName("editProductButton");
+                for (const button of editButtons) {
+                    const productId = button.classList[1];
+                    button.href = '/app/admin/addModifyProduct/' + productId;
+                }
+
+                const buttons = document.getElementsByClassName("addToCartButton");
+                for (const button of buttons) {
+                    const productId = button.classList[1];
+                    button.onclick = () => addToCart(productId);
+                }
+            }
+
+        </script>
+    </head>
+    <body>
+        <div th:replace="fragments/header :: header(${userInfo.email}, ${userInfo.id}, ${userInfo.sessionId}, ${userInfo.isAdmin})"></div>
+
+        <div th:if="${userInfo.isAdmin}">
+            <a href="/app/admin/addModifyProduct">Dodaj nowy produkt</a>
+        </div>
+        <table class="border">
+            <thead>
+                <tr>
+                    <td>Nazwa</td>
+                    <td>Opis</td>
+                    <td>Cena</td>
+                    <td>&nbsp;</td>
+                    <td th:if="${userInfo.isAdmin}">&nbsp;</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="product, id : ${products}">
+                    <td th:text="${product.name}"></td>
+                    <td th:text="${product.description}"></td>
+                    <td><span th:text="${product.price}"></span> PLN</td>
+                    <td th:if="${!userInfo.isAdmin}"><a href="#" th:class="@{'addToCartButton ' + ${product.productID}}">Dodaj do koszyka</a></td>
+                    <td th:if="${userInfo.isAdmin}"><a href="#" th:class="@{'editProductButton ' + ${product.productID}}">Edytuj produkt</a></td>
+                    <td th:if="${userInfo.isAdmin}"><a href="#" th:class="@{'removeProductButton ' + ${product.productID}}">Usuń produkt</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>

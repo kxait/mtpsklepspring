@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Zamówienia</title>
+        <link rel="stylesheet" href="/style.css">
+        <script th:if="${userInfo.isAdmin}" th:inline="javascript" type="application/javascript">
+            const statuses = [
+                "NEW",
+                "PROCESSING",
+                "SHIPPING",
+                "DELIVERED",
+                "CANCELLED"
+            ];
+
+            function setOrderStatus(orderId, orderStatus) {
+                return fetch('/api/admin/orders/' + orderId + '/setStatus', {
+                    method: 'POST',
+                    headers: {
+                        id: [[${userInfo.sessionId}]],
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderStatus)
+                });
+            }
+
+            function createPrechosenDropdownWithAction(choices, chosen, onchange) {
+                console.log(choices, chosen, onchange);
+                let elem = document.createElement("select");
+                for(const choice of choices) {
+                    let optionElem = document.createElement("option");
+                    optionElem.value = choice;
+                    optionElem.innerText = choice;
+                    optionElem.selected = choice === chosen;
+                    elem.add(optionElem);
+                }
+                elem.onchange = e => onchange(e.target);
+                return elem;
+            }
+
+            window.onload = () => {
+                const statusSelectItems = document.getElementsByClassName("statusSelect");
+
+                while(statusSelectItems[0]) {
+                    const item = statusSelectItems[0];
+                    const chosenStatus = item.classList[1];
+                    const userId = item.classList[2];
+                    const elem = createPrechosenDropdownWithAction(
+                        statuses,
+                        chosenStatus,
+                        target => setOrderStatus(userId, target.value));
+                    item.replaceWith(elem);
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div th:replace="fragments/header :: header(${userInfo.email}, ${userInfo.id}, ${userInfo.sessionId}, ${userInfo.isAdmin})"></div>
+
+        <div th:if="${orderBills != null && orderBills.size() != 0}">
+            <table class="border">
+                <thead>
+                    <tr>
+                        <td th:if="${userInfo.isAdmin}">Email</td>
+                        <td>Data</td>
+                        <td>Status</td>
+                        <td>Suma</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="orderBill, id : ${orderBills}">
+                        <td th:if="${userInfo.isAdmin}" th:text="${orderBill.user.email}"></td>
+                        <td th:text="${orderBill.order.orderDate}"></td>
+                        <td th:if="${!userInfo.isAdmin}" th:text="${orderBill.order.status.toString()}"></td>
+                        <td th:if="${userInfo.isAdmin}"><select th:class="@{'statusSelect ' + ${orderBill.order.status.toString()} + ' ' + ${orderBill.order.orderID}}"></select></td>
+                        <td><span th:text="${orderBill.bill.sum}"></span> PLN</td>
+                        <td><a th:href="@{'/app/orders/' + ${orderBill.order.orderID}}">Szczegóły</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:if="${orderInfo != null}">
+            <p>Zamówienie #<span class="b" th:text="${orderInfo.order.orderID}"></span></p>
+            <div class="breakout">
+                <p th:if="${userInfo.isAdmin}" >Email: <span class="b" th:text="${orderInfo.user.email}"></span></p>
+                <p>Data zlozenia zamowienia: <span class="b" th:text="${orderInfo.order.orderDate}"></span></p>
+                <p>Cena: <span class="b" th:text="${orderInfo.bill.sum}"></span> PLN</p>
+                <div>
+                    <p>Adres:</p>
+                    <p class="b" th:text="@{${orderInfo.address.street} + ' ' + ${orderInfo.address.streetNumber}}"></p>
+                    <p class="b" th:text="@{${orderInfo.address.postalCode} + ' ' + ${orderInfo.address.city} + ' ' + ${orderInfo.address.country}}"></p>
+                    <p class="b" th:text="${orderInfo.address.phone}"></p>
+                </div>
+                <p>
+                    Status:
+                    <span th:if="${!userInfo.isAdmin}" class="b" th:text="${orderInfo.order.status}"></span>
+                    <select th:if="${userInfo.isAdmin}" th:class="@{'statusSelect ' + ${orderInfo.order.status} + ' ' + ${orderInfo.order.orderID}}"></select>
+                </p>
+                <p>Produkty (<span class="b" th:text="@{${orderInfo.products.size()}}"></span>):</p>
+                <table class="border">
+                    <thead>
+                        <tr>
+                            <td>Nazwa</td>
+                            <td>Cena</td>
+                            <td>Ilosc</td>
+                            <td>Suma</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="productQuantity, id : ${orderInfo.products}">
+                            <td th:text="${productQuantity.product.name}"></td>
+                            <td><span th:text="${productQuantity.product.price}"></span> PLN</td>
+                            <td th:text="${productQuantity.quantity}"></td>
+                            <td><span th:text="${productQuantity.product.price * productQuantity.quantity}"></span> PLN</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+</html>

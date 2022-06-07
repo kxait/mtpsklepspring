@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Menu</title>
+        <style>
+            #message {
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <div th:replace="fragments/header :: header(${userInfo.email}, ${userInfo.id}, ${userInfo.sessionId}, ${userInfo.isAdmin})"></div>
+        <div th:if="${message != null}" th:text="${message}" id="message"></div>
+        <p>
+            <a href="products">Lista produktów</a>
+        </p>
+        <p>
+            <a href="orders" th:if="${!userInfo.isAdmin}">Twoje zamówienia</a>
+            <a href="orders" th:if="${userInfo.isAdmin}">Wszystkie zamówienia</a>
+        </p>
+        <p th:if="${userInfo.isAdmin}">
+            <a href="/app/admin/users">Użytkownicy</a>
+        </p>
+        <p>
+            <a href="/logout">Wyloguj</a>
+        </p>
+    </body>
+</html>

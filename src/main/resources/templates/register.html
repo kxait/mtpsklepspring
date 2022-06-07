@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zarejestruj sie</title>
+    <style>
+        p.error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<p th:if="${error != null}" class="error" th:text="${error}"></p>
+<form action="#" th:action="@{/register}" th:object="${loginForm}" method="post">
+    <p>
+        Email:
+        <input type="text" th:field="*{email}"/>
+    </p>
+    <p>
+        Hasło:
+        <input type="password" th:field="*{password}"/>
+    </p>
+    <p>
+        <input type="submit" value="Zarejestruj" />
+    </p>
+</form>
+</body>
+</html>

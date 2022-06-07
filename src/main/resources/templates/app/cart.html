@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Produkty</title>
+        <link rel="stylesheet" href="/style.css">
+        <script type="application/javascript" th:inline="javascript">
+            function removeFromCart(productId) {
+                fetch('/api/cart/' + productId, {
+                    method: 'DELETE',
+                    headers: {
+                        id: [[${userInfo.sessionId}]],
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(-1)
+                }).then(_ => document.location = '');
+            }
+
+            window.onload = () => {
+                const buttons = document.getElementsByClassName("removeFromCartButton");
+                for (const button of buttons) {
+                    const productId = button.classList[1];
+                    button.onclick = () => removeFromCart(productId);
+                }
+            }
+
+        </script>
+    </head>
+    <body>
+        <div th:replace="fragments/header :: header(${userInfo.email}, ${userInfo.id}, ${userInfo.sessionId}, ${userInfo.isAdmin})"></div>
+
+        <div th:if="${cart.size() == 0}">
+            Pusty koszyk!
+        </div>
+        <div th:if="${cart.size() > 0}">
+            <table class="border">
+                <thead>
+                <tr>
+                    <td>Nazwa</td>
+                    <td>Cena</td>
+                    <td>Ilosc</td>
+                    <td>&nbsp;</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="entry, id : ${cart}">
+                    <td th:text="${entry.productName}"></td>
+                    <td><span th:text="${entry.productPrice}"></span> PLN</td>
+                    <td th:text="${entry.quantity}"></td>
+                    <td><a href="#" th:class="@{'removeFromCartButton ' + ${entry.productId}}">Usun</a></td>
+                </tr>
+                </tbody>
+            </table>
+            <a href="/app/createOrder">Zamów koszyk</a>
+        </div>
+    </body>
+</html>

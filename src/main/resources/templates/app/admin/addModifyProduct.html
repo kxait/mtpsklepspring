@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body>
+        <div th:replace="fragments/header :: header(${userInfo.email}, ${userInfo.id}, ${userInfo.sessionId}, ${userInfo.isAdmin})"></div>
+        <div id="message" th:if="${message != null}" th:text="${message}"></div>
+        <div class="breakout">
+            <form action="#" th:action="@{/app/admin/addModifyProduct}" th:object="${productForm}" method="post">
+                <table>
+                    <tr>
+                        <td>Nazwa</td>
+                        <td><input type="text" th:field="*{name}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Opis:</td>
+                        <td><input type="text" th:field="*{description}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Producent:</td>
+                        <td><input type="text" th:field="*{manufacturer}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Cena:</td>
+                        <td><input type="number" th:field="*{price}"/></td>
+                    </tr>
+                </table>
+                <p>
+                    <input th:if="${modify == false}" type="submit" value="Dodaj produkt" />
+                    <input th:if="${modify == true}" type="submit" value="Zmień produkt" />
+                </p>
+            </form>
+        </div>
+    </body>
+</html>
