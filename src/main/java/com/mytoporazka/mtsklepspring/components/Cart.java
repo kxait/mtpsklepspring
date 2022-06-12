@@ -45,11 +45,7 @@ public class Cart {
         var userCart = carts.get(userId);
 
         if(quantity == -1 || quantity == userCart.size()) {
-            var newCart = userCart
-                    .stream()
-                    .filter(c -> c.left != productId)
-                    .toList();
-            carts.put(userId, newCart);
+            userCart.removeIf(c -> c.left == productId);
             return;
         }
 
